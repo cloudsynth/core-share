@@ -1,6 +1,7 @@
 package plugins
 
 import (
+	"github.com/cloudsynth/core-share/perms"
 	"google.golang.org/grpc"
 	"net/http"
 )
@@ -26,4 +27,4 @@ type Config struct {
 	JWKProviders      []JWKProvider
 }
 
-type PluginMakeHandler func(config Config) (*grpc.Server, http.HandlerFunc, error)
+type PluginMakeHandler func(config Config, findActor  perms.GRPCActorFinder) (*grpc.Server, http.HandlerFunc, error)
