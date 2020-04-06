@@ -37,6 +37,7 @@ func (p Params) Get(key string) (value string, ok bool) {
 type Config struct {
 	DebugDbQueries     bool          `json:"debug_db_queries"`
 	DbConnectionString string        `json:"db_connection_string"`
+	DbDialect          string        `json:"db_dialect"`
 	SuperuserPskToken  string        `json:"superuser_psk_token"`
 	JwtProviders       []JWTProvider `json:"jwt_providers"`
 	JwkProviders       []JWKProvider `json:"jwk_providers"`
