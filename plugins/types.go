@@ -18,14 +18,29 @@ type JWKProvider struct {
 	ExpectedAlgo     string   `json:"expected_algo"`
 }
 
-type Config struct {
-	DebugDbQueries    bool
-	DbDialect         string
-	DbDialectArgs     []string
-	SuperUserPSKToken string
-	JWTProviders      []JWTProvider
-	JWKProviders      []JWKProvider
-	AppConfig		  map[string]string
+type KVPair struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
 }
 
-type PluginMakeHandler func(config Config, findActor  perms.GRPCActorFinder) (*grpc.Server, http.HandlerFunc, error)
+type Params []KVPair
+
+func (p Params) Get(key string) (value string, ok bool) {
+	for _, param := range p {
+		if param.Key == key {
+			return param.Value, true
+		}
+	}
+	return "", false
+}
+
+type Config struct {
+	DebugDbQueries     bool          `json:"debug_db_queries"`
+	DbConnectionString string        `json:"db_connection_string"`
+	SuperuserPskToken  string        `json:"superuser_psk_token"`
+	JwtProviders       []JWTProvider `json:"jwt_providers"`
+	JwkProviders       []JWKProvider `json:"jwk_providers"`
+	AppConfig          Params        `json:"app_config"`
+}
+
+type PluginMakeHandler func(config Config, findActor perms.GRPCActorFinder) (*grpc.Server, http.HandlerFunc, error)
