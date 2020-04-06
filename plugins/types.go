@@ -25,6 +25,7 @@ type Config struct {
 	SuperUserPSKToken string
 	JWTProviders      []JWTProvider
 	JWKProviders      []JWKProvider
+	AppConfig		  map[string]string
 }
 
 type PluginMakeHandler func(config Config, findActor  perms.GRPCActorFinder) (*grpc.Server, http.HandlerFunc, error)
