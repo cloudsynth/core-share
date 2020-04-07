@@ -44,4 +44,4 @@ type Config struct {
 	AppConfig          Params        `json:"app_config"`
 }
 
-type PluginMakeHandler func(config Config, findActor perms.GRPCActorFinder) (*grpc.Server, http.HandlerFunc, error)
+type PluginMakeHandler func(config Config, findActor perms.GRPCActorFinder, hooks interface{}, additionalMethodsd interface{}) (*grpc.Server, http.HandlerFunc, error)
