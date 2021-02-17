@@ -1,7 +1,6 @@
 package perms
 
 import (
-	"context"
 	"fmt"
 	"github.com/pkg/errors"
 	"strings"
@@ -69,6 +68,6 @@ func BotSuperUser() Actor {
 	}
 }
 
-type GRPCActorFinder interface {
-	ResolveGRPCActor(context.Context) (Actor, error)
+type ActorFinder interface {
+	FindActor(token string) (Actor, error)
 }
