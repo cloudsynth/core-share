@@ -9,15 +9,25 @@ import (
 )
 
 func GRPCMDToHTTPHeaders(md metadata.MD) http.Header {
+	// You can simply cast metadata.MD to http.Header but we do this to copy and
+	// keep case control (e.g Authorization vs authorization) in both (setters)
 	httpHeaders := http.Header{} // Normalizes headers for us.
 	for key, values := range md {
-		if len(values) == 0 {
-			continue
+		for _, v := range values {
+			httpHeaders.Add(key, v)
 		}
-		httpHeaders.Set(key, values[0])
 	}
 	return httpHeaders
 }
+
+func HttpHeadersToGrpcMD(headers http.Header) metadata.MD {
+	md := metadata.MD{} // Normalizes headers for us.
+	for key, values := range headers{
+		md.Append(key, values...)
+	}
+	return md
+}
+
 
 func IPV4FromHeaders(headers http.Header) string {
 	// source: https://github.com/un33k/django-ipware

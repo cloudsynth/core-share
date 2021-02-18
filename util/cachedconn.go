@@ -7,6 +7,8 @@ import (
 	"time"
 	"strings"
 	"net"
+	"net/http"
+	"context"
 )
 
 var rpcConnMemoizer = memoize.NewMemoizer(time.Hour, time.Hour)
@@ -47,4 +49,25 @@ func CachedDbConn(dialect, connString string) (*gorm.DB, error) {
 	return connI.(*gorm.DB), err
 }
 
+
+
+
+var transportMemoizer = memoize.NewMemoizer(time.Hour, time.Hour)
+func CachedTransport(endpoint string) (*http.Transport, error) {
+	connI, err, _ := transportMemoizer.Memoize(endpoint, func() (interface{}, error) {
+		return &http.Transport{
+			DialContext: func(_ context.Context, _, _ string) (net.Conn, error) {
+				network := "tcp"
+				if strings.HasPrefix(endpoint, "/"){
+					network = "unix"
+				}
+				return net.Dial(network, endpoint)
+			},
+		}, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return connI.(*http.Transport), err
+}
 
