@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc/metadata"
-	"strings"
 )
 
 type JWTProvider struct {
@@ -44,28 +43,13 @@ type AuthConfig struct {
 	EnablePublicReadPerms bool          `json:"enable_public_read_perms,omitempty" toml:"enable_public_read_perms,omitempty"`
 }
 
-type EnabledHook struct {
-	Model    string `json:"model,omitempty" toml:"model,omitempty"`
-	HookType string `json:"hook_type,omitempty" toml:"hook_type,omitempty"`
-}
-
 type ServerConfig struct {
 	DebugDbQueries     bool          `json:"debug_db_queries,omitempty" toml:"debug_db_queries,omitempty"`
 	DbConnectionString string        `json:"db_connection_string,omitempty" toml:"db_connection_string,omitempty"`
 	DbDialect          string        `json:"db_dialect,omitempty" toml:"db_dialect,omitempty"`
 	AuthConfig         AuthConfig    `json:"auth_config,omitempty" toml:"auth_config,omitempty"`
 	SelfEndpoint       string        `json:"self_endpoint,omitempty" toml:"self_endpoint,omitempty"`
-	EnabledHooks       []EnabledHook `json:"enabled_hooks,omitempty" toml:"enabled_hooks,omitempty"`
 	Vars               Params        `json:"vars,omitempty" toml:"vars,omitempty"`
-}
-
-func (s *ServerConfig) HookEnabled(model string, hookType string) bool {
-	for _, enabledHook := range s.EnabledHooks {
-		if strings.ToLower(enabledHook.Model) == strings.ToLower(model) && strings.ToLower(enabledHook.HookType) == strings.ToLower(hookType) {
-			return true
-		}
-	}
-	return false
 }
 
 type RequestMeta struct {
