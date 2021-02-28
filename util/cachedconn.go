@@ -1,26 +1,26 @@
 package util
 
 import (
+	"context"
+	"github.com/pkg/errors"
+	"gorm.io/gorm"
+	"gorm.io/driver/postgres"
 	"github.com/kofalt/go-memoize"
+	"github.com/patrickmn/go-cache"
 	"google.golang.org/grpc"
-	"github.com/jinzhu/gorm"
-	"time"
-	"strings"
 	"net"
 	"net/http"
-	"context"
+	"strings"
 )
 
-var rpcConnMemoizer = memoize.NewMemoizer(time.Hour, time.Hour)
+
+var connMemoizer = memoize.NewMemoizer(cache.NoExpiration, -1)
+
 func CachedGrpcConn(endpoint string) (*grpc.ClientConn, error) {
-	connI, err, _ := rpcConnMemoizer.Memoize(endpoint, func() (interface{}, error) {
-		dialOpts := []grpc.DialOption{grpc.WithInsecure()}
+	connI, err, _ := connMemoizer.Memoize("grpc" + endpoint, func() (interface{}, error) {
 		if strings.HasPrefix(endpoint, "/"){
-				dialOpts = append(dialOpts, grpc.WithDialer(func(addr string, timeout time.Duration) (net.Conn, error) {
-					return net.DialTimeout("unix", addr, timeout)
-				}))
 		}
-		return grpc.Dial(endpoint, dialOpts...)
+		return grpc.Dial(endpoint, grpc.WithInsecure())
 	})
 	if err != nil {
 		return nil, err
@@ -29,18 +29,24 @@ func CachedGrpcConn(endpoint string) (*grpc.ClientConn, error) {
 }
 
 
-var connMemoizer = memoize.NewMemoizer(time.Hour, time.Hour)
 func CachedDbConn(dialect, connString string) (*gorm.DB, error) {
-	connI, err, _ := connMemoizer.Memoize(dialect+connString, func() (interface{}, error) {
-		dbConn, err := gorm.Open(dialect, connString)
+	connI, err, _ := connMemoizer.Memoize("gorm" + dialect+connString, func() (interface{}, error) {
+		if dialect != "postgres"{
+			return nil, errors.New("unsupported dialect")
+		}
+		dbConn, err := gorm.Open(postgres.Open(connString), &gorm.Config{})
 		if err != nil{
 			return nil, err
 		}
-		dbConn.DB().SetMaxOpenConns(8)
-		dbConn.DB().SetMaxIdleConns(8)
+		db, err := dbConn.DB()
+		if err != nil{
+			errors.Wrap(err, "unable to grab underlying connection")
+		}
+		db.SetMaxOpenConns(8)
+		db.SetMaxIdleConns(8)
 		// Ensure bulk removes don't happen
 		// https://github.com/go-gorm/gorm/issues/1152
-		dbConn = dbConn.BlockGlobalUpdate(true)
+		//dbConn = dbConn.BlockGlobalUpdate(true) // Not needed in new gorm
 		return dbConn, nil
 	})
 	if err != nil {
@@ -49,12 +55,8 @@ func CachedDbConn(dialect, connString string) (*gorm.DB, error) {
 	return connI.(*gorm.DB), err
 }
 
-
-
-
-var transportMemoizer = memoize.NewMemoizer(time.Hour, time.Hour)
 func CachedTransport(endpoint string) (*http.Transport, error) {
-	connI, err, _ := transportMemoizer.Memoize(endpoint, func() (interface{}, error) {
+	connI, err, _ := connMemoizer.Memoize("http" + endpoint, func() (interface{}, error) {
 		return &http.Transport{
 			DialContext: func(_ context.Context, _, _ string) (net.Conn, error) {
 				network := "tcp"
