@@ -19,8 +19,14 @@ var connMemoizer = memoize.NewMemoizer(cache.NoExpiration, -1)
 func CachedGrpcConn(endpoint string) (*grpc.ClientConn, error) {
 	connI, err, _ := connMemoizer.Memoize("grpc" + endpoint, func() (interface{}, error) {
 		if strings.HasPrefix(endpoint, "/"){
+			endpoint = "unix://" + endpoint
 		}
-		return grpc.Dial(endpoint, grpc.WithInsecure())
+		return grpc.Dial(endpoint,
+			grpc.WithInsecure(),
+			grpc.WithInsecure(),
+			grpc.FailOnNonTempDialError(true),
+			grpc.WithBlock(),
+		)
 	})
 	if err != nil {
 		return nil, err
@@ -34,7 +40,7 @@ func CachedDbConn(dialect, connString string) (*gorm.DB, error) {
 		if dialect != "postgres"{
 			return nil, errors.New("unsupported dialect")
 		}
-		dbConn, err := gorm.Open(postgres.Open(connString), &gorm.Config{})
+		dbConn, err := gorm.Open(postgres.Open(connString), &gorm.Config{SkipDefaultTransaction: true})
 		if err != nil{
 			return nil, err
 		}

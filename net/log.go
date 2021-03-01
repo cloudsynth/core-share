@@ -16,10 +16,12 @@ func GrpcLoggingInterceptors() (grpc.UnaryServerInterceptor, grpc.StreamServerIn
 		v, err := handler(ctx, req)
 		end := time.Now()
 		status := 200
+		logPrefix := log.Info()
 		if err != nil{
 			status = 500
+			logPrefix = log.Error().Err(err)
 		}
-		log.Info().
+		logPrefix.
 			Str("path", info.FullMethod).
 			Int("code", status).
 			Dur("timeMs", end.Sub(start)).
@@ -32,10 +34,12 @@ func GrpcLoggingInterceptors() (grpc.UnaryServerInterceptor, grpc.StreamServerIn
 		err := handler(srv, stream)
 		end := time.Now()
 		status := 200
+		logPrefix := log.Info()
 		if err != nil{
 			status = 500
+			logPrefix = log.Error().Err(err)
 		}
-		log.Info().
+		logPrefix.
 			Str("path", info.FullMethod).
 			Int("code", status).
 			Dur("timeMs", end.Sub(start)).
@@ -44,8 +48,6 @@ func GrpcLoggingInterceptors() (grpc.UnaryServerInterceptor, grpc.StreamServerIn
 	}
 	return unary, stream
 }
-
-
 
 func HttpLoggingHandler(f http.HandlerFunc) http.Handler {
 	c := alice.New()

@@ -30,7 +30,10 @@ func ServeGrpcAndHttpMultiplexed(addr string, grpcServer *grpc.Server, httpHandl
 		return true
 	})
 
-	grpcListener := multiplexer.Match(cmux.HTTP2())
+	grpcListener := multiplexer.MatchWithWriters(
+		cmux.HTTP2MatchHeaderFieldSendSettings("content-type", "application/grpc"),
+		cmux.HTTP2MatchHeaderFieldSendSettings("content-type", "application/grpc+proto"),
+	)
 	httpListener := multiplexer.Match(cmux.Any())
 
 	errChan := make(chan error)

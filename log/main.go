@@ -3,12 +3,14 @@ package log
 import (
 	"bytes"
 	"fmt"
+	"github.com/egymgmbh/go-prefix-writer/prefixer"
+	"github.com/fatih/color"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"io"
 	"os"
-	"github.com/egymgmbh/go-prefix-writer/prefixer"
-	"github.com/fatih/color"
+	"runtime"
+	"time"
 )
 
 func ColoredLinePrefixWriter(w io.Writer, group string, colorV color.Attribute) io.Writer {
@@ -25,11 +27,18 @@ func ColoredLinePrefixWriter(w io.Writer, group string, colorV color.Attribute) 
 	})
 }
 
-func InitializeGlobalLogger(myName string, prettyInsteadOfJSON bool){
+func InitializeGlobalLogger(myName string, prettyInsteadOfJSON bool) {
 	// make sure we dont log reqs/resp in grpc
 	output := ColoredLinePrefixWriter(os.Stdout, myName, color.FgGreen)
 
-	if prettyInsteadOfJSON{
+	go func() {
+		for {
+			<-time.After(time.Second * 30)
+			log.Debug().Msgf("Current goroutine count %d", runtime.NumGoroutine())
+		}
+	}()
+
+	if prettyInsteadOfJSON {
 		log.Logger = log.Output(zerolog.ConsoleWriter{Out: output}).With().Timestamp().Logger()
 	} else {
 		log.Logger = zerolog.New(output).With().Timestamp().Logger()
