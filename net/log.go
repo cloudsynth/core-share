@@ -53,6 +53,9 @@ func HttpLoggingHandler(f http.HandlerFunc) http.Handler {
 	c := alice.New()
 	c = c.Append(hlog.NewHandler(log.Logger))
 	c = c.Append(hlog.AccessHandler(func(r *http.Request, status, size int, duration time.Duration) {
+		if r.Method == "PRI" { // Http2 passthrough headers
+			return
+		}
 		hlog.FromRequest(r).Info().
 			Str("path", r.URL.Path).
 			Int("code", status).
