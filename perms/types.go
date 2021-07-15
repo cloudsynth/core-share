@@ -12,6 +12,7 @@ var ErrorGeneric = fmt.Errorf("api token invalid")
 
 type PermissionLevel string
 
+const LevelSuperUser = PermissionLevel("superuser")
 const LevelOwner = PermissionLevel("owner")
 const LevelWriter = PermissionLevel("writer")
 const LevelReader = PermissionLevel("reader")

@@ -34,16 +34,21 @@ func IsAtLeastLevel(readers, writers, owners []string, actor Actor, level Permis
 	if len(actorIdentities) == 0 {
 		return false
 	}
-	if level == LevelOwner {
-		return len(funk.IntersectString(owners, actorIdentities)) > 0
+	if level == LevelSuperUser {
+		return actor.IsSuperUser()
+	} else if level == LevelOwner {
+		return len(funk.IntersectString(owners, actorIdentities)) > 0 ||
+			actor.IsSuperUser()
 
 	} else if level == LevelWriter {
 		return len(funk.IntersectString(owners, actorIdentities)) > 0 ||
-			len(funk.IntersectString(writers, actorIdentities)) > 0
+			len(funk.IntersectString(writers, actorIdentities)) > 0 ||
+			actor.IsSuperUser()
 	} else if level == LevelReader {
 		return len(funk.IntersectString(owners, actorIdentities)) > 0 ||
 			len(funk.IntersectString(writers, actorIdentities)) > 0 ||
-			len(funk.IntersectString(readers, actorIdentities)) > 0
+			len(funk.IntersectString(readers, actorIdentities)) > 0 ||
+			actor.IsSuperUser()
 	}
 	return false
 }
