@@ -16,6 +16,16 @@ const LevelSuperUser = PermissionLevel("superuser")
 const LevelOwner = PermissionLevel("owner")
 const LevelWriter = PermissionLevel("writer")
 const LevelReader = PermissionLevel("reader")
+var allLevels = []PermissionLevel{LevelSuperUser, LevelOwner, LevelWriter, LevelReader}
+
+func IsValidLevel(level string) bool {
+	for _, registeredLevel := range allLevels {
+		if PermissionLevel(level) == registeredLevel {
+			return true
+		}
+	}
+	return false
+}
 
 type Actor interface {
 	IdentitySubject() string

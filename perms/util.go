@@ -25,9 +25,6 @@ func GetTokenFromGrpcContext(ctx context.Context) string {
 }
 
 func IsAtLeastLevel(readers, writers, owners []string, actor Actor, level PermissionLevel) bool {
-	if actor.IsSuperUser() {
-		return true
-	}
 	actorIdentities := append([]string{actor.IdentitySubject()}, actor.MemberSubjects()...)
 	actorIdentities = funk.FilterString(actorIdentities, func(s string) bool { return s != "" })
 	// case where empty strings are returned by the find actor

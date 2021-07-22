@@ -2,13 +2,13 @@ package net
 
 import (
 	"github.com/pkg/errors"
+	"github.com/rs/zerolog/log"
+	"github.com/soheilhy/cmux"
 	"google.golang.org/grpc"
 	"net"
 	"net/http"
 	"strings"
 	"time"
-	"github.com/soheilhy/cmux"
-	"github.com/rs/zerolog/log"
 )
 
 func ServeGrpcAndHttpMultiplexed(addr string, grpcServer *grpc.Server, httpHandler http.Handler, defaultTimeout time.Duration) error {
@@ -39,10 +39,10 @@ func ServeGrpcAndHttpMultiplexed(addr string, grpcServer *grpc.Server, httpHandl
 	errChan := make(chan error)
 	httpServer := http.Server{
 		Handler:           http.TimeoutHandler(httpHandler, defaultTimeout, "timeout"),
-		ReadTimeout:       1 * time.Second,
-		WriteTimeout:      1 * time.Second,
+		ReadTimeout:       30 * time.Second,
+		WriteTimeout:      30 * time.Second,
 		IdleTimeout:       30 * time.Second,
-		ReadHeaderTimeout: 2 * time.Second,
+		ReadHeaderTimeout: 30 * time.Second,
 	}
 	go func() {
 		err := grpcServer.Serve(grpcListener)
