@@ -14,7 +14,7 @@ require (
 	github.com/soheilhy/cmux v0.1.4
 	github.com/stretchr/testify v1.5.1
 	github.com/thoas/go-funk v0.6.0
-	golang.org/x/net v0.0.0-20200324143707-d3edc9973b7e // indirect
+	golang.org/x/net v0.7.0 // indirect
 	google.golang.org/grpc v1.28.0
 	gorm.io/driver/postgres v1.0.8
 	gorm.io/gorm v1.20.12
